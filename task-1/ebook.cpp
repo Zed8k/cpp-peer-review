@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <map>
+#include <unordered_map>
 
 /** \brief  Прочитать одну строку с потока
  *  \param[in]  input - Входной поток
@@ -16,15 +16,15 @@ inline std::string ReadLine( std::istream& input ){
     return str_line;
 }
 
-/** \brief  Получить максимум запросов из входного потока
+/** \brief  Получить количество запросов из входного потока
  *  \param[in]  input - Входной поток
  *  \return     Максимум запросов для обработки
  */
-inline size_t GetMaxQueryes( std::istream& input ){
-    size_t max_queryes = 0;
-    input >> max_queryes;
+inline size_t GetQueryesCount( std::istream& input ){
+    size_t count_queryes = 0;
+    input >> count_queryes;
     ReadLine(input);
-    return max_queryes;
+    return count_queryes;
 }
 
 /** \brief  Система стимулирования чтения электронных книг
@@ -83,13 +83,13 @@ private:
      *  \b key - id пользователя
      *  \b value - номер страницы, на которой остановился пользователь
      */
-    std::map<size_t, size_t> stop_on_page_;
+    std::unordered_map<size_t, size_t> stop_on_page_;
     
     /** \brief  Количество пользователей, остановившихся на странице
      *  \b key - номер страници, на которой остановился пользователь
      *  \b value - количество пользователей
      */
-    std::map<size_t, size_t> count_users_;
+    std::unordered_map<size_t, size_t> count_users_;
 };
 
 int main()
@@ -100,10 +100,10 @@ int main()
     for ( size_t n_query = 0; n_query < max_queryes; ++n_query ){
         std::string cmd;
         size_t id = 0;
-        size_t page = 0;
         std::cin >> cmd >> id;
         if ( *cmd.begin() == 'R' ){
             // Запрос READ
+            size_t page = 0;
             std::cin >> page;
             book_manager.Read(id, page);
         }
