@@ -20,7 +20,7 @@ Domain::Domain( std::string domain )
     , domain_(domain)
     , top_domain_()
     , level_() {
-        DomainSplit( Reverse(std::move(domain)) );
+        DomainSplit( std::string(domain.rbegin(), domain.rend()) );
 }
 
 bool Domain::operator==( const Domain& domain ) const {
@@ -100,12 +100,11 @@ Domain Domain::GetTopDomain() const {
             top_domain += '.';
         }
     }
-    return Domain( Reverse(top_domain) );
+    return Domain( std::string(top_domain.rbegin(), top_domain.rend()) );
 }
 
 Domain Domain::GetRootDomain() const {
-    std::string root_domain = Reverse(*domains_.begin());
-    return Domain( std::move(root_domain) );
+    return Domain( std::string( (*domains_.begin()).rbegin(), (*domains_.begin()).rend() ) );
 }
 
 Domain Domain::GetDomainLevel( size_t level=1 ) const {
@@ -116,30 +115,10 @@ Domain Domain::GetDomainLevel( size_t level=1 ) const {
             domain += '.';
         }
     }
-    return Domain( Reverse(domain) );
+    return Domain( std::string(domain.rbegin(), domain.rend()) );
 }
 
 //--- Приватные методы ---------------------------------------------------------
-
-inline std::string Domain::Reverse( const std::string& domain ){
-    std::string result = ""s;
-    if ( !domain.empty() ){
-        for ( int n = domain.size()-1; n >= 0; --n ){
-            result += domain[n];
-        }
-    }
-    return result;
-}
-
-inline std::string Domain::Reverse( const std::string& domain ) const {
-    std::string result = ""s;
-    if ( !domain.empty() ){
-        for ( int n = domain.size()-1; n >= 0; --n ){
-            result += domain[n];
-        }
-    }
-    return result;
-}
 
 inline void Domain::DomainSplit( std::string domain ){
     bool is_top_domain = true;

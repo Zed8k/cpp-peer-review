@@ -12,10 +12,6 @@
 #include <string>
 #include <vector>
 #include <execution>
-#include <iterator>
-
-#define DomainChecker_Constructor_Rev_4
-#define DomainChecker_IsForbidden_Rev_3
 
 /** \brief  Класс описывающий сущность Домен
  */
@@ -100,20 +96,6 @@ private:
     // Уровень домена
     size_t level_;
 
-    /** \brief  Развернуть порядок строки адреса домена
-     *
-     *  \param[in]  domain - Ссылка на строку адреса доменя
-     *  \return     Развёрнутую строку в обратном порядке адрес домена
-     */
-    inline std::string Reverse( const std::string& domain );
-
-    /** \brief  Развернуть порядок строки адреса домена
-     *
-     *  \param[in]  domain - Ссылка на строку адреса доменя
-     *  \return     Развёрнутую строку в обратном порядке адрес домена
-     */
-    inline std::string Reverse( const std::string& domain ) const;
-
     /** \brief      Разложить строку домена на поддомены
      *
      *  \param[in]  domain - Строка домена
@@ -154,7 +136,6 @@ public:
 
 private:
     std::vector<Domain> forbidden_list_;
-    const size_t level_to_parallel_mode_ = 1000;
 };
 
 //------------------------------------------------------------------------------
@@ -163,52 +144,14 @@ private:
 
 template <typename InputIt>
 DomainChecker::DomainChecker( InputIt range_begin, InputIt range_end )
-    : forbidden_list_() {
+    : forbidden_list_(range_begin, range_end) {
     using namespace std::literals;
-    forbidden_list_.reserve( 1000 );
-
-    for ( auto it = range_begin; it != range_end; ++it ){
-        // Если список пустой - сразу добавляем
-        if ( forbidden_list_.empty() ){
-            forbidden_list_.push_back( *it );
-            continue;
-        }
-        // Ищем домен начиная с корневого в глубь
-        size_t it_level = it->GetLevel();
-        bool is_finded = false;
-        for ( size_t n = 1; n <= it_level; ++n ){
-            Domain target_domain = it->GetDomainLevel( n );
-            if ( std::binary_search(forbidden_list_.begin(), forbidden_list_.end(), target_domain) ){
-                is_finded = true;
-                break;
-            }
-        }
-        // Если не нашли, то добавляем
-        if ( !is_finded ){
-            forbidden_list_.push_back( *it );
-            // Сортируем
-            if ( forbidden_list_.size() > level_to_parallel_mode_ ){
-                // В параллельном режиме
-                std::sort( std::execution::par, forbidden_list_.begin(), forbidden_list_.end() );
-            }
-            else {
-                // Иначе в последовательном режиме
-                std::sort( forbidden_list_.begin(), forbidden_list_.end() );
-            }
-            // Удаляем поддомены
-            auto it_last = (forbidden_list_.size() > level_to_parallel_mode_)
-                ? std::unique( std::execution::par, forbidden_list_.begin(), forbidden_list_.end(),
-                    [](const Domain& lhs, const Domain& rhs){
-                        return lhs.IsTopdomain(rhs);
-                    } )
-                : std::unique( forbidden_list_.begin(), forbidden_list_.end(),
-                    [](const Domain& lhs, const Domain& rhs){
-                        return lhs.IsTopdomain(rhs);
-                } );
-            forbidden_list_.erase( it_last, forbidden_list_.end() );
-            continue;
-        }
-    }
+    auto comp = []( const Domain& lhs, const Domain& rhs ){
+        return lhs == rhs || lhs.IsTopdomain(rhs);
+    };
+    std::sort( forbidden_list_.begin(), forbidden_list_.end() );
+    auto it_end = std::unique( forbidden_list_.begin(), forbidden_list_.end(), comp );
+    forbidden_list_.resize( it_end - forbidden_list_.begin() );
 }
 
 /** @} Group_DomainChecker */
