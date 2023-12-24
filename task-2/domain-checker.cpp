@@ -24,7 +24,7 @@ Domain::Domain( std::string domain )
 }
 
 bool Domain::operator==( const Domain& domain ) const {
-    return Reverse( domain_ ) == Reverse( domain.domain_ );
+    return domain_ == domain.domain_;
 }
 
 bool Domain::operator<( const Domain& domain ) const {

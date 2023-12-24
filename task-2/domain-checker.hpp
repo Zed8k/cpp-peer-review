@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <execution>
+#include <iterator>
 
 #define DomainChecker_Constructor_Rev_4
 #define DomainChecker_IsForbidden_Rev_3
